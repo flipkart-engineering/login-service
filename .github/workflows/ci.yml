@@ -8,10 +8,11 @@ on:
 jobs:
 
   build-and-test:
-    name: Build and Test
+    name: Build Test and Dockerize
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Checkout Repository
         uses: actions/checkout@v4
 
@@ -25,10 +26,8 @@ jobs:
         run: chmod +x mvnw
 
       - name: Build Application
-        run: ./mvnw clean compile
-
-      - name: Run Unit Tests
-        run: ./mvnw test
-
-      - name: Package JAR
         run: ./mvnw clean package
+
+      - name: Build Docker Image
+        run: |
+          docker build -t login-service:${{ github.sha }} .
