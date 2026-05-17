@@ -7,8 +7,8 @@ on:
 
 jobs:
 
-  build-and-test:
-    name: Build Test and Dockerize
+  build-test-docker:
+    name: Build, Test and Push Docker Image
     runs-on: ubuntu-latest
 
     steps:
@@ -25,9 +25,17 @@ jobs:
       - name: Grant Execute Permission
         run: chmod +x mvnw
 
-      - name: Build Application
+      - name: Build Application (Maven)
         run: ./mvnw clean package
+
+      - name: Login to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
       - name: Build Docker Image
         run: |
-          docker build -t login-service:${{ github.sha }} .
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/login-service:${{ github.sha }} .
+
+      - name: Push Docker Image
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/login-service:${{ github.sha }}
