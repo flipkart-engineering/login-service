@@ -7,90 +7,28 @@ on:
 
 jobs:
 
-  init:
-    name: Init
+  build-and-test:
+    name: Build and Test
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Initialize Pipeline
-        run: echo "Initializing CI Pipeline"
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
 
-  code-checks:
-    name: Trigger Code Checks
-    runs-on: ubuntu-latest
-    needs: init
+      - name: Grant Execute Permission
+        run: chmod +x mvnw
 
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Run Code Validation
-        run: echo "Running code quality checks"
-
-  deploy-checks:
-    name: Trigger Deploy Checks
-    runs-on: ubuntu-latest
-    needs: code-checks
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Validate Deployment Files
-        run: echo "Checking Kubernetes and Helm manifests"
-
-  unit-tests:
-    name: Metrics Unit Tests
-    runs-on: ubuntu-latest
-    needs: deploy-checks
-
-    steps:
-      - uses: actions/checkout@v4
+      - name: Build Application
+        run: ./mvnw clean compile
 
       - name: Run Unit Tests
-        run: echo "Executing unit tests"
+        run: ./mvnw test
 
-  dependency-scan:
-    name: Dependency Version
-    runs-on: ubuntu-latest
-    needs: unit-tests
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Dependency Validation
-        run: echo "Checking dependency versions"
-
-  service-build:
-    name: Service Build
-    runs-on: ubuntu-latest
-    needs: dependency-scan
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build Service
-        run: echo "Building login-service"
-
-  sonar:
-    name: SonarQube
-    runs-on: ubuntu-latest
-    needs: service-build
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: SonarQube Scan
-        run: echo "Running SonarQube analysis"
-
-  pr-validation:
-    name: PR Validation
-    runs-on: ubuntu-latest
-    needs: sonar
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Validate Pull Request
-        run: echo "PR validation successful"
+      - name: Package JAR
+        run: ./mvnw clean package
