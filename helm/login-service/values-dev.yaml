@@ -1,0 +1,11 @@
+replicaCount: 1
+
+image:
+  repository: harshanmj/login-service
+  tag: latest
+
+service:
+  type: ClusterIP
+  port: 8080
+
+containerPort: 8080
